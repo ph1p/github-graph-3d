@@ -12,6 +12,10 @@ let renderer: THREE.WebGLRenderer;
 let controls: OrbitControls;
 let group: THREE.Group;
 
+const textures: THREE.Texture[] = new Array(7)
+  .fill(null)
+  .map(() => new THREE.Texture(generateTexture()));
+
 function generate3dGraph(data: any, username: string) {
   if (group) {
     scene.remove(group);
@@ -43,16 +47,9 @@ function generate3dGraph(data: any, username: string) {
           sizes.width
         );
 
-        const texture = new THREE.Texture(generateTexture());
-        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        const texture = textures[randomNumberBetween(0, 6)];
+        texture.wrapS = texture.wrapT = THREE.MirroredRepeatWrapping;
         texture.offset.set(0, 0);
-        texture.repeat.set(
-          1,
-          day.count *
-            sizes.max *
-            sizes.width *
-            (Math.random() * (0.4 - 0.6) + 0.6)
-        );
         texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
         texture.needsUpdate = true;
 

@@ -5,17 +5,17 @@ export const randomNumberBetween = (min: number, max: number) =>
   Math.floor(Math.random() * (max - min + 1) + min);
 
 // thanks to http://learningthreejs.com/blog/2013/08/02/how-to-do-a-procedural-city-in-100lines/
-const canvas = window.OffscreenCanvas
-  ? new OffscreenCanvas(32, 64)
-  : document.createElement('canvas');
-const canvas2 = window.OffscreenCanvas
-  ? new OffscreenCanvas(512, 1024)
-  : document.createElement('canvas');
-
-const context = canvas.getContext('2d')!;
-const context2 = canvas2.getContext('2d')!;
-
 export function generateTexture() {
+  const canvas = window.OffscreenCanvas
+    ? new OffscreenCanvas(32, 64)
+    : document.createElement('canvas');
+  const context = canvas.getContext('2d')!;
+
+  const canvas2 = window.OffscreenCanvas
+    ? new OffscreenCanvas(512, 1024)
+    : document.createElement('canvas');
+  const context2 = canvas2.getContext('2d')!;
+
   const width = 32;
   const height = 64;
   const width2 = 512;
