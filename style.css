@@ -1,0 +1,40 @@
+body {
+  margin: 0;
+  font-family: Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
+
+input {
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.form {
+  font-size: 14px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+}
+
+#loader {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgb(255 255 255 / 80%);
+  z-index: 5;
+}
+
+#loader span {
+  font-size: 28px;
+  color: #000;
+  align-self: center;
+  margin: 0 auto;
+}
