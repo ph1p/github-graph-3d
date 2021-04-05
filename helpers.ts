@@ -5,12 +5,28 @@ export const randomNumberBetween = (min: number, max: number) =>
   Math.floor(Math.random() * (max - min + 1) + min);
 
 // thanks to http://learningthreejs.com/blog/2013/08/02/how-to-do-a-procedural-city-in-100lines/
-export const generateTexture = () => {
+const canvas = window.OffscreenCanvas
+  ? new OffscreenCanvas(32, 64)
+  : document.createElement('canvas');
+const canvas2 = window.OffscreenCanvas
+  ? new OffscreenCanvas(512, 1024)
+  : document.createElement('canvas');
+
+const context = canvas.getContext('2d')!;
+const context2 = canvas2.getContext('2d')!;
+
+export function generateTexture() {
   const width = 32;
   const height = 64;
+  const width2 = 512;
+  const height2 = 1024;
 
-  const canvas = new OffscreenCanvas(width, height);
-  const context = canvas.getContext('2d')!;
+  if (!window.OffscreenCanvas) {
+    canvas.width = width;
+    canvas.height = height;
+    canvas2.width = width2;
+    canvas2.height = height2;
+  }
 
   context.fillStyle = '#ffffff';
   context.fillRect(0, 0, width, height);
@@ -32,13 +48,8 @@ export const generateTexture = () => {
     }
   }
 
-  const width2 = 512,
-    height2 = 1024;
-  const canvas2 = new OffscreenCanvas(width2, height2);
-  const context2 = canvas2.getContext('2d')!;
-
   context2.imageSmoothingEnabled = false;
   context2.drawImage(canvas, 0, 0, width2, height2);
 
   return (canvas2 as unknown) as HTMLCanvasElement;
-};
+}

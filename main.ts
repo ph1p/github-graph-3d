@@ -79,8 +79,6 @@ function generate3dGraph(data: any, username: string) {
           new THREE.PlaneGeometry(sizes.width, sizes.width),
           new THREE.MeshPhongMaterial({
             color: levelColor[day.level],
-
-            // side: THREE.DoubleSide,
           })
         );
         roof.rotateX(-Math.PI / 2);
@@ -93,25 +91,13 @@ function generate3dGraph(data: any, username: string) {
         );
         skyscraper.add(roof);
 
-        const wireframe = new THREE.LineSegments(
-          new THREE.WireframeGeometry(geometry),
-          new THREE.LineBasicMaterial({
-            color: 0xf00000,
-            linewidth: 5,
-          })
-        );
-
         skyscrapers.push({
           skyscraper,
-          wireframe,
         });
 
-        skyscraper.visible = true;
-        wireframe.visible = false;
+        // skyscraper.visible = true;
 
-        wireframe.position.copy(position);
-
-        group.add(skyscraper, wireframe);
+        group.add(skyscraper);
       }
     });
   });
@@ -128,10 +114,6 @@ function generate3dGraph(data: any, username: string) {
     groundMat
   );
   group.add(ground);
-  ground.position.set(0, -sizes.width / 2, sizes.width * 3);
-  ground.receiveShadow = true;
-
-  group.position.set(0, sizes.width, 0);
 
   new THREE.FontLoader().load(
     'https://unpkg.com/three@0.77.0/examples/fonts/helvetiker_regular.typeface.json',
@@ -163,10 +145,12 @@ function generate3dGraph(data: any, username: string) {
     }
   );
 
+  ground.position.set(0, -sizes.width / 2, sizes.width * 3);
+  group.position.set(0, sizes.width, 0);
   scene.add(group);
 }
 
-async function init() {
+function init() {
   window.addEventListener('resize', onWindowResize);
 
   scene = new THREE.Scene();
@@ -188,10 +172,9 @@ async function init() {
   // scene.add(new THREE.GridHelper(40, 40));
 
   // RENDERER
-  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer = new THREE.WebGLRenderer({ alpha: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setClearColor(0xffffff);
   document.body.appendChild(renderer.domElement);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -233,6 +216,8 @@ async function init() {
   controls.autoRotateSpeed = 0.2;
   controls.target.set(0, 0, 0);
   controls.update();
+
+  return scene;
 }
 
 function onWindowResize() {
@@ -272,6 +257,7 @@ const loadGraph = (username: string | null) => {
           }
           generate3dGraph(data, username);
         }
+
         toggleLoader();
       })
       .catch(toggleLoader);
@@ -280,19 +266,21 @@ const loadGraph = (username: string | null) => {
   }
 };
 
-const params = new URLSearchParams(window.location.search);
+(function () {
+  const params = new URLSearchParams(window.location.search);
 
-loadGraph(params.get('name'));
+  loadGraph(params.get('name'));
 
-const usernameInput: HTMLInputElement | null = document.querySelector(
-  '#github-username'
-);
-const loadButton = document.querySelector('#load-github-graph');
+  const usernameInput: HTMLInputElement | null = document.querySelector(
+    '#github-username'
+  );
+  const loadButton = document.querySelector('#load-github-graph');
 
-loadButton?.addEventListener('click', () => {
-  if (!usernameInput?.value) {
-    alert('Please enter a username');
-  } else {
-    loadGraph(usernameInput?.value);
-  }
-});
+  loadButton?.addEventListener('click', () => {
+    if (!usernameInput?.value) {
+      alert('Please enter a username');
+    } else {
+      loadGraph(usernameInput?.value);
+    }
+  });
+})();

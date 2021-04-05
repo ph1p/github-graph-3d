@@ -31,8 +31,6 @@ const getGithubGraphWeeks = async (options: Options) => {
     params.append('to', options.to);
   }
 
-  console.log(`https://github.com/${options.name}?${params}`);
-
   await page.goto(`https://github.com/${options.name}?${params}`);
 
   const weeks = await page.evaluate(() => {
@@ -42,7 +40,7 @@ const getGithubGraphWeeks = async (options: Options) => {
     return {
       weeks: Array.from(
         document.querySelector('.js-calendar-graph svg g').querySelectorAll('g')
-      ).map((node, index) => ({
+      ).map((node) => ({
         days: Array.from(node.querySelectorAll('rect')).map((day) => {
           if (+day.dataset.count > highest) {
             highest = +day.dataset.count;
