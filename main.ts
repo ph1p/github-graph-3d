@@ -3,64 +3,14 @@ import './style.css';
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Mesh } from 'three';
+import { generateTexture, normalize, randomNumberBetween } from './helpers';
+import { levelColor } from './constants';
 
 let camera: THREE.PerspectiveCamera;
 let scene: THREE.Scene;
 let renderer: THREE.WebGLRenderer;
 let controls: OrbitControls;
 let group: THREE.Group;
-
-const levelColor: Record<number, string> = {
-  0: '#ebedf0',
-  1: '#c6e48b',
-  2: '#7bc96f',
-  3: '#239a3b',
-  4: '#196127',
-};
-
-const normalize = (val: any, max: any, min: any) => (val - min) / (max - min);
-
-const randomNumberBetween = (min: number, max: number) =>
-  Math.floor(Math.random() * (max - min + 1) + min);
-
-// thanks to http://learningthreejs.com/blog/2013/08/02/how-to-do-a-procedural-city-in-100lines/
-const generateTexture = () => {
-  const width = 32;
-  const height = 64;
-
-  const canvas = new OffscreenCanvas(width, height);
-  const context = canvas.getContext('2d')!;
-
-  context.fillStyle = '#ffffff';
-  context.fillRect(0, 0, width, height);
-
-  const row = randomNumberBetween(1, 3);
-
-  for (let y = 0; y < height; y += row) {
-    for (let x = 0; x < width; x += 2) {
-      const value = Math.floor(Math.random() * 64);
-
-      if (Math.floor(Math.random() * 1000) % 10 === 0) {
-        context.fillStyle =
-          'rgb(' + [255, 255, (Math.random() * 255) | 0].join(',') + ')';
-      } else {
-        context.fillStyle = 'rgb(' + [value, value, value].join(',') + ')';
-      }
-
-      context.fillRect(x, y, row !== 2 ? 1 : 2, 1);
-    }
-  }
-
-  const width2 = 512,
-    height2 = 1024;
-  const canvas2 = new OffscreenCanvas(width2, height2);
-  const context2 = canvas2.getContext('2d')!;
-
-  context2.imageSmoothingEnabled = false;
-  context2.drawImage(canvas, 0, 0, width2, height2);
-
-  return (canvas2 as unknown) as HTMLCanvasElement;
-};
 
 function generate3dGraph(data: any, username: string) {
   if (group) {
@@ -129,7 +79,8 @@ function generate3dGraph(data: any, username: string) {
           new THREE.PlaneGeometry(sizes.width, sizes.width),
           new THREE.MeshPhongMaterial({
             color: levelColor[day.level],
-            side: THREE.DoubleSide,
+
+            // side: THREE.DoubleSide,
           })
         );
         roof.rotateX(-Math.PI / 2);
@@ -188,7 +139,7 @@ function generate3dGraph(data: any, username: string) {
       const textGeo = new THREE.TextGeometry(`@${username}`, {
         font,
         size: sizes.width,
-        height: sizes.width / 4,
+        height: 0.1,
       });
 
       textGeo.computeBoundingBox();
@@ -224,8 +175,8 @@ async function init() {
   camera = new THREE.PerspectiveCamera(
     10,
     window.innerWidth / window.innerHeight,
-    1,
-    10000
+    30,
+    1000
   );
   camera.position.set(
     -0.7197292629569743,
@@ -303,6 +254,7 @@ const toggleLoader = () => {
     loader.style.display === 'none' || !loader.style.display ? 'flex' : 'none';
 };
 
+// FORM
 const loadGraph = (username: string | null) => {
   toggleLoader();
   if (username) {
