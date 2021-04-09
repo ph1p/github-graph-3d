@@ -7,7 +7,18 @@ interface Options {
   to?: string;
 }
 
-const getGithubGraphWeeks = async (options: Options) => {
+interface GitHubGraphWeek {
+  level: number;
+  count: number;
+  date: string;
+}
+interface GitHubGraphResponse {
+  lowest: number;
+  highest: number;
+  weeks: GitHubGraphWeek[];
+}
+
+const getGithubGraphWeeks = async (options: Options): Promise<GitHubGraphResponse> => {
   if (!options.name) {
     throw Error();
   }
@@ -42,14 +53,25 @@ const getGithubGraphWeeks = async (options: Options) => {
         document.querySelector('.js-calendar-graph svg g').querySelectorAll('g')
       ).map((node) => ({
         days: Array.from(node.querySelectorAll('rect')).map((day) => {
-          if (+day.dataset.count > highest) {
-            highest = +day.dataset.count;
+          let {
+            level,
+            count,
+            date,
+          } = (day.dataset as unknown) as GitHubGraphWeek;
+
+          level = +level;
+          count = +count;
+
+          if (count > highest) {
+            highest = count;
           }
-          if (+day.dataset.count < lowest) {
-            lowest = +day.dataset.count;
+          if (count < lowest) {
+            lowest = count;
           }
           return {
-            ...day.dataset,
+            level,
+            count,
+            date,
           };
         }),
       })),

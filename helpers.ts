@@ -1,3 +1,20 @@
+import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
+
+const link = document.createElement('a');
+link.style.display = 'none';
+document.body.appendChild(link);
+const exporter = new STLExporter();
+
+export function exportSTL(mesh: THREE.Mesh, filename: string) {
+  if (mesh && filename) {
+    link.href = URL.createObjectURL(
+      new Blob([exporter.parse(mesh)], { type: 'text/plain' })
+    );
+    link.download = `${filename}.stl`;
+    link.click();
+  }
+}
+
 export const normalize = (val: any, max: any, min: any) =>
   (val - min) / (max - min);
 
