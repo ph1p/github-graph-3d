@@ -28,8 +28,8 @@ export function generateTexture() {
     canvas2.height = height2;
   }
 
-  context.fillStyle = '#ffffff';
-  context.fillRect(0, 0, width, height);
+  (context as any).fillStyle = '#ffffff';
+  (context as any).fillRect(0, 0, width, height);
 
   const row = randomNumberBetween(1, 3);
 

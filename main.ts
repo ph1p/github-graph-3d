@@ -1,10 +1,12 @@
 import * as THREE from 'three';
 import './style.css';
 
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Mesh } from 'three';
 import { generateTexture, normalize, randomNumberBetween } from './helpers';
 import { levelColor } from './constants';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
 
 let camera: THREE.PerspectiveCamera;
 let scene: THREE.Scene;
@@ -33,7 +35,7 @@ function generate3dGraph(data: any, username: string) {
   // SYK SCRAPERS
   data.weeks.forEach((week: any, weekIndex: any) => {
     week.days.forEach((day: any, dayIndex: any) => {
-      if (day.count !== '0') {
+      if (day.count !== 0) {
         const position = new THREE.Vector3(
           (weekIndex - (data.weeks.length - 1) / 2) * sizes.width,
           ((day.count * sizes.max) / 2) * sizes.width,
@@ -66,6 +68,7 @@ function generate3dGraph(data: any, username: string) {
             shininess: 10,
             map: texture,
             flatShading: true,
+            clipShadows: true,
           })
         );
         skyscraper.receiveShadow = true;
@@ -75,9 +78,10 @@ function generate3dGraph(data: any, username: string) {
         const roof = new THREE.Mesh(
           new THREE.PlaneGeometry(sizes.width, sizes.width),
           new THREE.MeshPhongMaterial({
-            color: levelColor[day.level],
+            color: new THREE.Color(levelColor[day.count]),
           })
         );
+        roof.receiveShadow = true;
         roof.rotateX(-Math.PI / 2);
         roof.position.copy(
           new THREE.Vector3(
@@ -95,6 +99,8 @@ function generate3dGraph(data: any, username: string) {
         // skyscraper.visible = true;
 
         group.add(skyscraper);
+        group.receiveShadow = true;
+        group.castShadow = true;
       }
     });
   });
@@ -110,12 +116,14 @@ function generate3dGraph(data: any, username: string) {
     ),
     groundMat
   );
+  ground.receiveShadow = true;
+  ground.castShadow = true;
   group.add(ground);
 
-  new THREE.FontLoader().load(
+  new FontLoader().load(
     'https://unpkg.com/three@0.77.0/examples/fonts/helvetiker_regular.typeface.json',
     (font) => {
-      const textGeo = new THREE.TextGeometry(`@${username}`, {
+      const textGeo = new TextGeometry(`@${username}`, {
         font,
         size: sizes.width,
         height: 0.1,
@@ -185,27 +193,28 @@ function init() {
   hemiLight.position.set(0, 50, 0);
   scene.add(hemiLight);
 
-  const dirLight = new THREE.DirectionalLight(0xffffff, 0.1);
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.2);
   dirLight.color.setHSL(0.1, 1, 0.95);
   dirLight.position.set(-1, 2, 3);
   dirLight.lookAt(0, 0, 0);
   dirLight.position.multiplyScalar(10);
-  scene.add(dirLight);
 
   dirLight.castShadow = true;
 
-  dirLight.shadow.mapSize.width = 1048;
-  dirLight.shadow.mapSize.height = 1048;
+  dirLight.shadow.mapSize.width = 4048;
+  dirLight.shadow.mapSize.height = 4048;
 
-  const d = 10;
+  const d = 40;
 
   dirLight.shadow.camera.left = -d;
   dirLight.shadow.camera.right = d;
   dirLight.shadow.camera.top = d;
   dirLight.shadow.camera.bottom = -d;
 
-  dirLight.shadow.camera.far = 2500;
+  dirLight.shadow.camera.far = 500;
   dirLight.shadow.bias = -0.0001;
+
+  scene.add(dirLight);
 
   // Controls
   controls = new OrbitControls(camera, renderer.domElement);
@@ -243,7 +252,7 @@ const loadGraph = (username: string | null) => {
     if (renderer) {
       renderer.clear();
     }
-    fetch(`https://github-graph-3d.vercel.app/api/graph?name=${username}`)
+    fetch(`${import.meta.env.VITE_API_URL}api/graph?name=${username}`)
       .then(async (res) => {
         const data = await res.json();
 
@@ -268,9 +277,8 @@ const loadGraph = (username: string | null) => {
 
   loadGraph(params.get('name'));
 
-  const usernameInput: HTMLInputElement | null = document.querySelector(
-    '#github-username'
-  );
+  const usernameInput: HTMLInputElement | null =
+    document.querySelector('#github-username');
   const loadButton = document.querySelector('#load-github-graph');
 
   loadButton?.addEventListener('click', () => {

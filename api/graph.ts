@@ -1,6 +1,16 @@
-import chromium from 'chrome-aws-lambda';
 import { VercelRequest, VercelResponse } from '@vercel/node';
 
+let chromium: any = {
+  args: []
+};
+let puppeteer: any;
+
+if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+  chromium = (await import('chrome-aws-lambda')).default;
+  puppeteer = await import('puppeteer-core');
+} else {
+  puppeteer = await import('puppeteer');
+}
 interface Options {
   name: string;
   from?: string;
@@ -15,7 +25,7 @@ const getGithubGraphWeeks = async (options: Options) => {
   // remove @ sign
   options.name = options.name.replace(/@/g, '');
 
-  const browser = await chromium.puppeteer.launch({
+  const browser = await puppeteer.launch({
     args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'],
     defaultViewport: chromium.defaultViewport,
     executablePath: await chromium.executablePath,
@@ -39,17 +49,18 @@ const getGithubGraphWeeks = async (options: Options) => {
 
     return {
       weeks: Array.from(
-        document.querySelector('.js-calendar-graph svg g').querySelectorAll('g')
+        document.querySelectorAll('.js-calendar-graph svg g > g')
       ).map((node) => ({
         days: Array.from(node.querySelectorAll('rect')).map((day) => {
-          if (+day.dataset.count > highest) {
-            highest = +day.dataset.count;
+          if (+day.dataset.level! > highest) {
+            highest = +day.dataset.level!;
           }
-          if (+day.dataset.count < lowest) {
-            lowest = +day.dataset.count;
+          if (+day.dataset.level! < lowest) {
+            lowest = +day.dataset.level!;
           }
           return {
-            ...day.dataset,
+            date: day.dataset.date,
+            count: +day.dataset.level!,
           };
         }),
       })),
@@ -59,12 +70,11 @@ const getGithubGraphWeeks = async (options: Options) => {
   });
 
   await browser.close();
-
   return weeks;
 };
 
 export default async function (req: VercelRequest, res: VercelResponse) {
-  const { name, from, to } = (req.query as unknown) as Options;
+  const { name, from, to } = req.query as unknown as Options;
 
   try {
     const weeks = await getGithubGraphWeeks({
@@ -74,10 +84,11 @@ export default async function (req: VercelRequest, res: VercelResponse) {
     });
 
     res.send(weeks);
-  } catch {
+  } catch (e) {
     res.status(400);
     res.send({
       error: true,
+      e: e.message,
     });
   }
 }

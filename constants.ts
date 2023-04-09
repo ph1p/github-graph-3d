@@ -1,7 +1,7 @@
-export const levelColor: Record<number, string> = {
-  0: '#ebedf0',
-  1: '#c6e48b',
-  2: '#7bc96f',
-  3: '#239a3b',
-  4: '#196127',
+export const levelColor: Record<number, number> = {
+  0: 0xebedf0,
+  1: 0xc6e48b,
+  2: 0x7bc96f,
+  3: 0x239a3b,
+  4: 0x196127,
 };
